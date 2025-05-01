@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -13,20 +14,27 @@ export class LoginComponent {
     message: '',
   }
 
-  constructor(private router:Router) {
+  constructor(private httpClient:HttpClient , public router:Router) {
 
   }
 
   signIn() {
-    console.log('in sign in function')
-    console.log('form.data:', this.form.data)
-    
+    this.httpClient.post('http://localhost:8000/ORSAPI/login/',this.form.data).subscribe((res:any)=>{
+      console.log('res=>',res)
+      this.form.message='';
 
-    if (this.form.data.loginId == 'admin' && this.form.data.password == 'admin') {
-      this.router.navigateByUrl('welcome')
-    } else {
-      this.form.message = 'Login ID & Password Invalid'
-    }
+      if(res.result.message){
+        this.form.message=res.result.message;
+      }
+
+      if(res.result.data !=null){
+        localStorage.setItem('firstName',res.result.data.firstName)
+        this.router.navigateByUrl('welcome');
+      }
+      console.log('data',res.result.data)
+      console.log('LocalStorage:', localStorage.getItem('firstName'));
+
+    })
   }
 
   signUp() {
